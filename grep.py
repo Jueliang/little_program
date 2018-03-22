@@ -2,7 +2,7 @@
 #
 # for Python3 and Python2
 # File: grep.py
-#
+# Date: 2018/3/22
 
 
 import io,sys,re
@@ -33,49 +33,44 @@ args = parser.parse_args()
 
 
 
-
-
 patterns = []
 
 for item in args.regex:
     patterns.append( re.compile(item) )
 #end{for}    
 
-def print_line(filename, line, line_number):
-    text = []
-    if args.with_filename:
-        text.append( filename )
-    #end{if}
+def print_line( linetext, filename, line_number):
+    if args.with_filename or args.line_number:
+        texts = []
 
-    if args.line_number:
         if args.with_filename:
-            text.append( ':' )
-            text.append( str(line_number) )
-        else:
-            text.append( str(line_number) )
+            texts.append( filename )
         #end{if}
-        text.append( '  ' )
-    else:
-        if args.with_filename:
-            text.append( '  ' )
+
+        if args.line_number:
+            if args.with_filename:
+                texts.append( ':' )
+            #end{if}
+            texts.append( str(line_number) )
         #end{if}
-    #end{if}
 
-    text.append( line )
+        if args.with_filename or args.line_number:
+            texts.append( '  ' )
+        #end{if}
 
-    if sys.version_info.major == 2:
-        print "".join(text)
+        texts.append( linetext )
+
+        print("".join(texts))
     else:
-        print( "".join(text) )
-    #end{if}        
+        print( linetext )
 #end{def}    
     
 
-def search( filename, line, line_number ):
+def search_line( line, filename, line_number ):
     for prog in patterns:
         m = prog.search( line )
         if m:
-            print_line(filename, line, line_number)
+            print_line( line, filename, line_number)
             break
         #end{if}
     #end{for}
@@ -83,17 +78,16 @@ def search( filename, line, line_number ):
 
 
 def grep():
-    for fname in args.filenames:
+    for fname in args.filenames:        
         with open( fname ) as f:
             line_count = 1
             for line in f:
-                search( fname, line, line_count )
+                search_line( line, fname, line_count )
                 line_count = line_count + 1
             #end{for} 
         #end{with}
     #end{for}
 #end{def}
-
 
 grep()
 
